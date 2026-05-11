@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Pureminds — Competitive Intelligence Report</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg: #08090c;
+  --surface: #0f1116;
+  --card: #13161d;
+  --border: #1e2230;
+  --border-light: #262b3a;
+
+  --gold: #c9a84c;
+  --gold-dim: rgba(201,168,76,0.12);
+  --gold-glow: rgba(201,168,76,0.06);
+
+  --red: #e05555;
+  --red-dim: rgba(224,85,85,0.1);
+  --green: #4ecb7a;
+  --green-dim: rgba(78,203,122,0.1);
+  --blue: #4e8ecb;
+  --blue-dim: rgba(78,142,203,0.1);
+  --purple: #9b6dd6;
+  --purple-dim: rgba(155,109,214,0.1);
+  --orange: #e07a33;
+  --orange-dim: rgba(224,122,51,0.1);
+
+  --text: #e8eaf0;
+  --muted: #6b7280;
+  --muted2: #9ca3af;
+
+  --c1: #e05555; /* Amkenah */
+  --c2: #4e8ecb; /* WOTN */
+  --c3: #4ecb7a; /* Blink */
+  --c4: #e07a33; /* Expand Expo */
+  --c5: #9b6dd6; /* Deep Vision */
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'Inter',sans-serif;
+  font-size:14px;
+  line-height:1.65;
+  overflow-x:hidden;
+}
+
+/* GRAIN */
+body::after{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:999;opacity:.7;
+}
+
+/* ── HERO ── */
+.hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;
+  justify-content:center;align-items:center;
+  text-align:center;
+  padding:80px 24px 60px;
+  position:relative;
+  overflow:hidden;
+}
+
+.hero-glow{
+  position:absolute;
+  top:50%;left:50%;
+  transform:translate(-50%,-60%);
+  width:700px;height:700px;
+  background:radial-gradient(ellipse at center,rgba(201,168,76,0.07) 0%,transparent 65%);
+  pointer-events:none;
+}
+
+.hero-eyebrow{
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--gold);
+  background:var(--gold-dim);
+  border:1px solid rgba(201,168,76,0.25);
+  padding:5px 16px;border-radius:100px;
+  margin-bottom:28px;
+  animation:up .6s ease both;
+}
+
+.hero h1{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(44px,8vw,96px);
+  font-weight:800;
+  line-height:.95;
+  letter-spacing:-3px;
+  margin-bottom:20px;
+  animation:up .7s .1s ease both;
+}
+.hero h1 em{font-style:normal;color:var(--gold)}
+
+.hero-sub{
+  color:var(--muted2);
+  font-size:16px;max-width:500px;
+  animation:up .7s .2s ease both;
+  margin-bottom:52px;
+}
+
+/* STAT STRIP */
+.stat-strip{
+  display:flex;gap:0;
+  border:1px solid var(--border);
+  border-radius:14px;
+  overflow:hidden;
+  animation:up .7s .3s ease both;
+}
+.stat-item{
+  padding:18px 28px;
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;gap:2px;
+}
+.stat-item:last-child{border-right:none}
+.stat-num{
+  font-family:'Syne',sans-serif;
+  font-size:28px;font-weight:800;line-height:1;
+}
+.stat-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);
+}
+
+.scroll-line{
+  position:absolute;bottom:36px;left:50%;transform:translateX(-50%);
+  width:1px;height:52px;
+  background:linear-gradient(to bottom,var(--gold),transparent);
+  animation:pulse 2s infinite;
+}
+
+/* ── LAYOUT ── */
+main{max-width:1200px;margin:0 auto;padding:0 24px 100px}
+
+/* SECTION */
+.sec-label{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:3px;text-transform:uppercase;
+  color:var(--gold);
+  display:flex;align-items:center;gap:12px;
+  margin-bottom:10px;
+}
+.sec-label::after{content:'';width:40px;height:1px;background:var(--gold);opacity:.4}
+
+.sec-title{
+  font-family:'Syne',sans-serif;
+  font-size:clamp(24px,4vw,36px);
+  font-weight:800;letter-spacing:-1px;
+  margin-bottom:40px;
+}
+.sec-title span{color:var(--gold)}
+
+/* COMPETITOR HEADER */
+.comp-section{margin-bottom:72px}
+
+.comp-header{
+  display:flex;align-items:center;gap:16px;
+  margin-bottom:28px;
+  padding:20px 24px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  position:relative;
+  overflow:hidden;
+}
+
+.comp-header::before{
+  content:'';
+  position:absolute;left:0;top:0;bottom:0;
+  width:4px;
+}
+
+.c1 .comp-header::before{background:var(--c1)}
+.c2 .comp-header::before{background:var(--c2)}
+.c3 .comp-header::before{background:var(--c3)}
+.c4 .comp-header::before{background:var(--c4)}
+.c5 .comp-header::before{background:var(--c5)}
+
+.comp-num{
+  font-family:'Syne',sans-serif;
+  font-size:48px;font-weight:800;line-height:1;
+  opacity:.08;
+  position:absolute;right:20px;top:50%;transform:translateY(-50%);
+}
+
+.comp-badge{
+  width:44px;height:44px;border-radius:12px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;
+  font-size:18px;font-weight:800;
+  flex-shrink:0;
+}
+
+.c1 .comp-badge{background:rgba(224,85,85,0.15);color:var(--c1)}
+.c2 .comp-badge{background:rgba(78,142,203,0.15);color:var(--c2)}
+.c3 .comp-badge{background:rgba(78,203,122,0.15);color:var(--c3)}
+.c4 .comp-badge{background:rgba(224,122,51,0.15);color:var(--c4)}
+.c5 .comp-badge{background:rgba(155,109,214,0.15);color:var(--c5)}
+
+.comp-name-block{}
+.comp-name{
+  font-family:'Syne',sans-serif;
+  font-size:22px;font-weight:800;letter-spacing:-.5px;
+}
+.comp-tagline{color:var(--muted2);font-size:13px}
+
+.comp-meta{
+  margin-left:auto;
+  display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;
+}
+.meta-chip{
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:.5px;
+  padding:3px 10px;border-radius:100px;
+  border:1px solid var(--border-light);
+  color:var(--muted2);
+  white-space:nowrap;
+}
+
+/* GRID */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+@media(max-width:900px){
+  .grid-2{grid-template-columns:1fr}
+  .grid-4{grid-template-columns:1fr 1fr}
+  .comp-meta{display:none}
+  .stat-strip{flex-wrap:wrap}
+}
+@media(max-width:540px){
+  .grid-4{grid-template-columns:1fr}
+}
+
+/* CARD */
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:22px;
+  transition:border-color .25s;
+}
+.card:hover{border-color:var(--border-light)}
+
+.card-title{
+  font-family:'Syne',sans-serif;
+  font-size:13px;font-weight:700;letter-spacing:.3px;
+  margin-bottom:14px;
+  display:flex;align-items:center;gap:8px;
+}
+
+.dot{
+  width:8px;height:8px;border-radius:50%;flex-shrink:0;
+}
+.dot-green{background:var(--green)}
+.dot-red{background:var(--red)}
+.dot-gold{background:var(--gold)}
+.dot-blue{background:var(--blue)}
+
+/* LIST */
+ul.pt{list-style:none;display:flex;flex-direction:column;gap:9px}
+ul.pt li{
+  display:flex;gap:10px;
+  font-size:13px;color:var(--muted2);
+  line-height:1.55;
+}
+ul.pt li::before{
+  content:'→';
+  flex-shrink:0;font-size:12px;
+  margin-top:1px;
+}
+ul.pt.green li::before{color:var(--green)}
+ul.pt.red li::before{color:var(--red)}
+ul.pt.gold li::before{color:var(--gold)}
+ul.pt.blue li::before{color:var(--blue)}
+ul.pt.purple li::before{color:var(--purple)}
+ul.pt.orange li::before{color:var(--orange)}
+
+/* PILLAR TAGS */
+.pillars{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+.pillar-tag{
+  font-size:12px;
+  padding:5px 12px;
+  border-radius:8px;
+  border:1px solid var(--border-light);
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;letter-spacing:.3px;
+}
+.c1 .pillar-tag{border-color:rgba(224,85,85,.25);color:var(--c1);background:rgba(224,85,85,.06)}
+.c2 .pillar-tag{border-color:rgba(78,142,203,.25);color:var(--c2);background:rgba(78,142,203,.06)}
+.c3 .pillar-tag{border-color:rgba(78,203,122,.25);color:var(--c3);background:rgba(78,203,122,.06)}
+.c4 .pillar-tag{border-color:rgba(224,122,51,.25);color:var(--c4);background:rgba(224,122,51,.06)}
+.c5 .pillar-tag{border-color:rgba(155,109,214,.25);color:var(--c5);background:rgba(155,109,214,.06)}
+
+/* IMAGE BLOCK */
+.image-block{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:16px 20px;
+  font-size:13px;
+  color:var(--muted2);
+  line-height:1.65;
+  font-style:italic;
+  position:relative;
+}
+.image-block::before{
+  content:'"';
+  font-family:'Syne',sans-serif;
+  font-size:40px;font-weight:800;
+  position:absolute;top:-8px;left:14px;
+  opacity:.15;line-height:1;
+}
+
+/* SCORE BAR */
+.score-row{margin-bottom:12px}
+.score-head{
+  display:flex;justify-content:space-between;
+  font-size:12px;color:var(--muted);
+  margin-bottom:4px;
+}
+.score-track{
+  height:3px;background:var(--border);
+  border-radius:100px;overflow:hidden;
+}
+.score-fill{
+  height:100%;border-radius:100px;
+  background:linear-gradient(90deg,var(--gold),#e8c96d);
+}
+.score-fill.red{background:linear-gradient(90deg,var(--red),#f08080)}
+.score-fill.green{background:linear-gradient(90deg,var(--green),#80e8a0)}
+.score-fill.blue{background:linear-gradient(90deg,var(--blue),#80b0e8)}
+
+/* FOLLOWERS BADGE */
+.followers{
+  display:inline-flex;align-items:center;gap:6px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  padding:3px 10px;
+  border-radius:100px;
+  border:1px solid var(--border-light);
+  color:var(--muted2);
+  margin-top:6px;
+}
+
+/* COMPARISON TABLE */
+.comp-table{
+  width:100%;border-collapse:collapse;
+  margin-top:8px;
+}
+.comp-table th{
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--muted);
+  padding:10px 14px;
+  text-align:left;
+  border-bottom:1px solid var(--border);
+}
+.comp-table td{
+  padding:12px 14px;
+  border-bottom:1px solid var(--border);
+  font-size:13px;color:var(--muted2);
+  vertical-align:top;
+}
+.comp-table tr:last-child td{border-bottom:none}
+.comp-table .company-cell{
+  font-family:'Syne',sans-serif;
+  font-weight:700;font-size:14px;color:var(--text);
+}
+.win{color:var(--green);font-size:11px;font-family:'JetBrains Mono',monospace}
+.lose{color:var(--red);font-size:11px;font-family:'JetBrains Mono',monospace}
+.mid{color:var(--gold);font-size:11px;font-family:'JetBrains Mono',monospace}
+
+/* HR */
+.hr{border:none;border-top:1px solid var(--border);margin:60px 0}
+
+/* OPPORTUNITY CARDS */
+.opp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:800px){.opp-grid{grid-template-columns:1fr}}
+
+.opp-card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:14px;
+  padding:22px;
+}
+.opp-icon{font-size:24px;margin-bottom:12px}
+.opp-title{
+  font-family:'Syne',sans-serif;
+  font-size:15px;font-weight:700;margin-bottom:8px;
+}
+.opp-desc{font-size:13px;color:var(--muted2);line-height:1.6}
+
+/* FOOTER */
+footer{
+  border-top:1px solid var(--border);
+  padding:36px 24px;
+  text-align:center;
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;letter-spacing:.5px;
+  color:var(--muted);
+}
+footer span{color:var(--gold)}
+
+/* ANIMATIONS */
+@keyframes up{
+  from{opacity:0;transform:translateY(20px)}
+  to{opacity:1;transform:translateY(0)}
+}
+@keyframes pulse{
+  0%,100%{opacity:.3;transform:translateX(-50%) scaleY(1)}
+  50%{opacity:1;transform:translateX(-50%) scaleY(1.08)}
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<header class="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-eyebrow">Competitive Intelligence — May 2026</div>
+  <h1>Pureminds<br/><em>vs. The Field</em></h1>
+  <p class="hero-sub">A content, SEO, and social media analysis of the 5 most direct competitors in the KSA events & integrated production market.</p>
+
+  <div class="stat-strip">
+    <div class="stat-item">
+      <div class="stat-num" style="color:var(--gold)">5</div>
+      <div class="stat-label">Competitors</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" style="color:var(--gold)">4</div>
+      <div class="stat-label">Dimensions</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" style="color:var(--gold)">KSA</div>
+      <div class="stat-label">Market</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-num" style="color:var(--gold)">B2B</div>
+      <div class="stat-label">Segment</div>
+    </div>
+  </div>
+
+  <div class="scroll-line"></div>
+</header>
+
+<main>
+
+<!-- ══ COMPETITOR 1: AMKENAH ══ -->
+<div class="comp-section c1">
+  <div class="comp-header">
+    <div class="comp-badge">A</div>
+    <div class="comp-name-block">
+      <div class="comp-name">Amkenah Marketing & Events</div>
+      <div class="comp-tagline">amkenah.sa · Founded 2014 · Riyadh</div>
+    </div>
+    <div class="comp-meta">
+      <span class="meta-chip">Marketing + Events</span>
+      <span class="meta-chip">Vision 2030 Partner</span>
+      <span class="meta-chip">Govt. Clients</span>
+    </div>
+    <div class="comp-num">01</div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:14px">
+    <!-- Website -->
+    <div class="card">
+      <div class="card-title"><div class="dot dot-green"></div>Website — Strengths</div>
+      <ul class="pt green">
+        <li>Portfolio of real named projects — CityScape 2023 &amp; 2024, Al-Fursan inauguration with HRH Prince of Riyadh — gives instant credibility</li>
+        <li>Has an active blog under Events &amp; Exhibitions with editorial articles about the KSA events sector — rare for local competitors</li>
+        <li>Services clearly listed: event planning, stage design, entertainment booking, logistics, marketing communication</li>
+        <li>Three core brand values visible: Design, Innovation, Communication — gives a clear positioning anchor</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="dot dot-red"></div>Website — Weaknesses & SEO</div>
+      <ul class="pt red">
+        <li>Website copy is generic — "reliable partner," "innovative solutions," "cost-effective" — nothing proprietary or memorable</li>
+        <li>No dedicated service landing pages with keyword-optimized content for organic search</li>
+        <li>No visible case study pages with measurable results or ROI proof</li>
+        <li>Blog content reads as thought leadership, but lacks SEO structure — no meta descriptions, no keyword targeting observed</li>
+        <li>No clear primary CTA architecture — the site doesn't guide a buyer from interest to inquiry</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="card-title"><div class="dot dot-green"></div>Social Media — Strengths</div>
+      <ul class="pt green">
+        <li>LinkedIn page exists and is active with project posts and industry event coverage</li>
+        <li>Brand presence is bilingual — posts in both Arabic and English</li>
+        <li>Project announcements include real client names (CityScape, Ajwad, Richy Group) which builds credibility</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="dot dot-red"></div>Social Media — Weaknesses</div>
+      <ul class="pt red">
+        <li>No follower counts publicly visible — LinkedIn and Instagram presence appears limited in scale</li>
+        <li>Content is purely broadcast — project completions and event photos with no strategy or engagement hooks</li>
+        <li>No thought leadership content, no industry commentary, no educational posts</li>
+        <li>Instagram presence thin — no engagement strategy visible</li>
+        <li>No use of LinkedIn-native formats (carousels, polls, documents)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title"><div class="dot dot-gold"></div>Content Pillars</div>
+      <div class="pillars">
+        <span class="pillar-tag">Project Showcases</span>
+        <span class="pillar-tag">Event Highlights</span>
+        <span class="pillar-tag">Industry Articles</span>
+        <span class="pillar-tag">Vision 2030 Alignment</span>
+        <span class="pillar-tag">VIP Event Coverage</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="dot dot-blue"></div>Brand Image They Project</div>
+      <div class="image-block">
+        A dependable, Vision 2030-aligned partner for institutional and government clients. Positions around trust and experience rather than creativity. The "reliable" agency that executes without surprises — not the bold creative force.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ COMPETITOR 2: WOTN ══ -->
+<div class="comp-section c2">
+  <div class="comp-header">
+    <div class="comp-badge">W</div>
+    <div class="comp-name-block">
+      <div class="comp-name">WOTN Event Management</div>
+      <div class="comp-tagline">wotn.com.sa · Founded 2019 · Riyadh</div>
+    </div>
+    <div class="comp-meta">
+      <span class="meta-chip">360° Events</span>
+      <span class="meta-chip">GEA Certified</span>
+      <span class="meta-chip">Great Place to Work</span>
+    </div>
+    <div class="comp-num">02</div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="card-title"><div class="dot dot-green"></div>Website — Strengths</div>
+      <ul class="pt green">
+        <li>Strong credentials clearly displayed: GEA Certified, Local Content Certificate, Great Place to Work, Ministry of Municipal Affairs certified — all visible trust signals</li>
+        <li>Clear vision statement: "Every event as a legacy moment" — more ambitious language than most competitors</li>
+        <li>Offices in both Riyadh and Cairo — signals regional ambition</li>
+        <li>Portfolio includes high-profile government events: Local Content Award Ceremony, Invest in Saudi Pavilion, Saudi-Italian Investment Forum</li>
+        <li>Five core values clearly articulated on the About page</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="dot dot-red"></div>Website — Weaknesses & SEO</div>
+      <ul class="pt red">
+        <li>Positioning language is vague and template-like — "impactful, innovative, and scalable experiences" could apply to any agency</li>
+        <li>No blog or content hub — zero SEO value from the website itself</li>
+        <li>No case studies with measurable outcomes — portfolio shows events but not results</li>
+        <li>Service pages lack keyword depth — not optimized for organic search</li>
+        <li>Founded 2019 — relatively young, which limits depth of proven track record on the site</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="card-title"><div class="dot dot-green"></div>Social Media — Strengths</div>
+      <ul class="pt green">
+        <li>LinkedIn and Instagram presence exist with active posting around major events</li>
+        <li>Certifications (GEA, Great Place to Work) shared on social — effective credentialing content</li>
+        <li>Arabic-first content that feels native and culturally aligned</li>
+        <li>Bilingual posts on key announcements</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="dot dot-red"></div>Social Media — Weaknesses</div>
+      <ul class="pt red">
+        <li>No client reviews publicly visible on any platform — trust signal absent</li>
+        <li>Social presence appears smaller than their positioning suggests — follower counts not confirmed to be significant</li>
+        <li>Content stays at announcement level — no behind-the-scenes, no process content, no thought leadership</li>
+        <li>No documented content strategy or consistent posting cadence</li>
+        <li>No use of LinkedIn documents, carousels, or polls to expand reach algorithmically</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title"><div class="dot dot-gold"></div>Content Pillars</div>
+      <div class="pillars">
+        <span class="pillar-tag">Event Execution</span>
+        <span class="pillar-tag">Government Projects</span>
+        <span class="pillar-tag">Certifications & Awards</span>
+        <span class="pillar-tag">Conference Coverage</span>
+        <span class="pillar-tag">Vision 2030</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="dot dot-blue"></div>Brand Image They Project</div>
+      <div class="image-block">
+        A rising national-scale events company with strong credentials and government-sector focus. Positions itself as a "legacy-maker" — ambitious language, but the content doesn't yet fully support that claim. Credibility is built on certifications more than proven creative differentiation.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ COMPETITOR 3: BLINK EXPERIENCE ══ -->
+<div class="comp-section c3">
+  <div class="comp-header">
+    <div class="comp-badge">B</div>
+    <div class="comp-name-block">
+      <div class="comp-name">Blink Experience</div>
+      <div class="comp-tagline">blinkexperience.com · Founded 2003 · Riyadh + Jeddah</div>
+    </div>
+    <div class="comp-meta">
+      <span class="meta-chip">66K LinkedIn</span>
+      <span class="meta-chip">21+ Years</span>
+      <span class="meta-chip">GCC Presence</span>
+    </div>
+    <div class="comp-num">03</div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="card-title"><div class="dot dot-green"></div>Website — Strengths</div>
+      <ul class="pt green">
+        <li>Highly detailed website with dedicated service pages — Festival Management, Corporate Events, Exhibition, Sports Events — each targeting specific search intent</li>
+        <li>Named proof points on every page: FIFA Club World Cup 2022, FEI World Cup Finals 2024, Riyadh Marathon, Dakar Rally, UN Tourism Assembly — impossible to question credibility</li>
+        <li>Guinness World Record 2018 badge — a unique, unmatched differentiator</li>
+        <li>Regulatory compliance section explicitly mentioned (GEA, SCEGA, SAGIA) — removes a common buyer objection</li>
+        <li>FAQ sections on service pages answer real buyer questions — good for both SEO and conversion</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="dot dot-red"></div>Website — Weaknesses & SEO</div>
+      <ul class="pt red">
+        <li>Website is SEO-heavy on company strengths but light on educational or industry content — no blog or resource section</li>
+        <li>Copy is extensive but repetitive — phrases like "unforgettable experiences" and "exceed expectations" appear across multiple pages</li>
+        <li>No pricing guidance or project scope indicators — raises friction for new mid-market clients who want a benchmark</li>
+        <li>Design feels corporate and template-like given their creative positioning — visual identity doesn't match the bold scale of their work</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="card-title"><div class="dot dot-green"></div>Social Media — Strengths</div>
+      <ul class="pt green">
+        <li><strong>66,902 LinkedIn followers</strong> — strongest social presence of all 5 competitors and significantly ahead of Pureminds' 45K</li>
+        <li>Consistent posting with project content, event coverage, and brand partnerships (Red Bull Racing)</li>
+        <li>Bilingual posts (Arabic + English) as standard practice</li>
+        <li>Partnership content is strategic — Red Bull Racing association signals premium positioning</li>
+        <li>Regular Instagram activity with polished event photography</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="dot dot-red"></div>Social Media — Weaknesses</div>
+      <ul class="pt red">
+        <li>Content is almost entirely portfolio-driven — "here's what we did" with no thought leadership, no industry perspective</li>
+        <li>Despite 66K followers, no observed use of high-reach LinkedIn formats (carousels, documents, polls)</li>
+        <li>No employee advocacy content — a major missed amplification opportunity at this scale</li>
+        <li>Engagement strategy absent — posts generate likes but not conversations</li>
+        <li>Tagline "Made In Tomorrow" is distinctive but underused in content strategy</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title"><div class="dot dot-gold"></div>Content Pillars</div>
+      <div class="pillars">
+        <span class="pillar-tag">Event Portfolio</span>
+        <span class="pillar-tag">Brand Partnerships</span>
+        <span class="pillar-tag">Sports Events</span>
+        <span class="pillar-tag">National Celebrations</span>
+        <span class="pillar-tag">Cultural Events</span>
+        <span class="pillar-tag">Vision 2030</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="dot dot-blue"></div>Brand Image They Project</div>
+      <div class="image-block">
+        The "biggest name in KSA events" — premium, proven, internationally connected. Positions around scale and track record above all else. The Guinness Record and Red Bull partnership signal that they operate at a level others don't. Risk is that they feel too corporate for clients seeking a creative partner rather than a production giant.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ COMPETITOR 4: EXPAND EXPO ══ -->
+<div class="comp-section c4">
+  <div class="comp-header">
+    <div class="comp-badge">E</div>
+    <div class="comp-name-block">
+      <div class="comp-name">Expand Expo</div>
+      <div class="comp-tagline">expandexpo.com · 23 Years · 58 Countries</div>
+    </div>
+    <div class="comp-meta">
+      <span class="meta-chip">29 Ministries</span>
+      <span class="meta-chip">23 Years</span>
+      <span class="meta-chip">58 Countries</span>
+    </div>
+    <div class="comp-num">04</div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="card-title"><div class="dot dot-green"></div>Website — Strengths</div>
+      <ul class="pt green">
+        <li>23-year legacy is the single strongest credibility signal in this competitive set — clearly featured on the homepage</li>
+        <li>"29 official governmental ministries" as clients is an extraordinary trust anchor — no competitor can match this claim</li>
+        <li>International presence across 58 countries signals scale beyond KSA and gives enterprise credibility</li>
+        <li>Clear positioning around revolutionizing the events industry — ambitious framing</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="dot dot-red"></div>Website — Weaknesses & SEO</div>
+      <ul class="pt red">
+        <li>Website content is minimal — the homepage leads with claims but delivers almost no supporting evidence or project details</li>
+        <li>No visible case studies despite 23 years of work — a major missed opportunity</li>
+        <li>Zero blog or content hub — no SEO value generated from the site</li>
+        <li>No service pages with keyword depth — the company is essentially invisible in organic search</li>
+        <li>Ministry client claims are unlinked and unverified publicly — potential buyers can't easily validate</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="card-title"><div class="dot dot-green"></div>Social Media — Strengths</div>
+      <ul class="pt green">
+        <li>The 23-year history and government ministry roster, if properly communicated on social, would be an extremely powerful content asset</li>
+        <li>International scope gives potential for regional GCC content strategy</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="dot dot-red"></div>Social Media — Weaknesses</div>
+      <ul class="pt red">
+        <li>LinkedIn and Instagram presence appears minimal — the brand's credibility is not matched by its digital presence</li>
+        <li>No confirmed follower counts suggesting a meaningful social audience</li>
+        <li>23 years of events history represents an enormous untapped content library — none of it appears to be in use digitally</li>
+        <li>The gap between their offline reputation and online visibility is the most pronounced of all 5 competitors</li>
+        <li>No content strategy observable — likely still operating primarily on referral and relationship-based sales</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title"><div class="dot dot-gold"></div>Content Pillars</div>
+      <div class="pillars">
+        <span class="pillar-tag">Government Events</span>
+        <span class="pillar-tag">Ministerial Projects</span>
+        <span class="pillar-tag">International Events</span>
+        <span class="pillar-tag">Legacy & Heritage</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="dot dot-blue"></div>Brand Image They Project</div>
+      <div class="image-block">
+        The "establishment" player — deeply embedded in government networks with 23 years of institutional trust. Positions around authority and longevity rather than creativity or innovation. They don't need to market digitally because their business comes through relationships and tender processes — but this creates a vulnerability if the next generation of buyers searches online first.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ COMPETITOR 5: DEEP VISION ══ -->
+<div class="comp-section c5">
+  <div class="comp-header">
+    <div class="comp-badge">D</div>
+    <div class="comp-name-block">
+      <div class="comp-name">Deep Vision Films</div>
+      <div class="comp-tagline">Saudi Brand · Founded 2018 · Riyadh</div>
+    </div>
+    <div class="comp-meta">
+      <span class="meta-chip">Exhibitions + Conferences</span>
+      <span class="meta-chip">Pureminds Partner/Rival</span>
+      <span class="meta-chip">Film + Production</span>
+    </div>
+    <div class="comp-num">05</div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="card-title"><div class="dot dot-green"></div>Website — Strengths</div>
+      <ul class="pt green">
+        <li>Niche focus on film production and exhibitions is a clearer positioning than most generalist competitors</li>
+        <li>Saudi Film Forum participation signals deep embeddedness in the growing Saudi film ecosystem</li>
+        <li>Collaboration with Pureminds on major campaigns (Dose Cafe, Saudi Film Forum) shows they can operate at a credible level</li>
+        <li>Mission statement ("DEEP VISION TO ACHIEVE YOUR MISSION") is memorable and distinctive</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="dot dot-red"></div>Website — Weaknesses & SEO</div>
+      <ul class="pt red">
+        <li>Instagram has only 2,321 followers and 101 posts — very limited reach for their age in the market</li>
+        <li>Primarily a film rental and production service — narrower scope than Pureminds' integrated model</li>
+        <li>No SEO-optimized content visible — website does not appear to generate organic search traffic</li>
+        <li>Founded 2018 — less market history than most competitors, limits the proof-point library</li>
+        <li>No blog, case studies, or educational content online</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid-2" style="margin-bottom:14px">
+    <div class="card">
+      <div class="card-title"><div class="dot dot-green"></div>Social Media — Strengths</div>
+      <ul class="pt green">
+        <li>Instagram account is active with 101 posts — consistent visual content for a production-focused brand</li>
+        <li>Association with Saudi Film Forum creates organic credibility content</li>
+        <li>Collaboration posts with Pureminds have reached a larger audience than their own following</li>
+      </ul>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="dot dot-red"></div>Social Media — Weaknesses</div>
+      <ul class="pt red">
+        <li>Instagram: 2,321 followers — smallest social presence in the competitive set by far</li>
+        <li>LinkedIn presence is minimal and fragmented across multiple possible pages with no confirmed significant following</li>
+        <li>Content is highly portfolio-focused with no strategy to build authority or thought leadership in the film/events space</li>
+        <li>Their best content happens in collaboration — independent content appears weaker</li>
+        <li>No use of LinkedIn or Instagram features that drive algorithmic reach</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title"><div class="dot dot-gold"></div>Content Pillars</div>
+      <div class="pillars">
+        <span class="pillar-tag">Film Production</span>
+        <span class="pillar-tag">Exhibition Builds</span>
+        <span class="pillar-tag">Equipment Rental</span>
+        <span class="pillar-tag">Saudi Film Scene</span>
+        <span class="pillar-tag">Creative Collaborations</span>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title"><div class="dot dot-blue"></div>Brand Image They Project</div>
+      <div class="image-block">
+        A specialized Saudi-native production house with a clear technical focus — film, equipment, and exhibition builds. Positions as a creative execution partner rather than a full-service strategic agency. Their image is more "craftsman" than "architect." The partnership model with Pureminds suggests they know their ceiling and work within it.
+      </div>
+    </div>
+  </div>
+</div>
+
+<hr class="hr"/>
+
+<!-- ══ COMPARISON TABLE ══ -->
+<div style="margin-bottom:60px">
+  <div class="sec-label">Summary</div>
+  <h2 class="sec-title">Head-to-Head <span>Scorecard</span></h2>
+
+  <div class="card" style="padding:0;overflow:hidden">
+    <table class="comp-table">
+      <thead>
+        <tr>
+          <th>Company</th>
+          <th>Website SEO</th>
+          <th>LinkedIn</th>
+          <th>Instagram</th>
+          <th>Thought Leadership</th>
+          <th>Creative Positioning</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="company-cell" style="color:var(--gold)">Pureminds ★</td>
+          <td><span class="lose">Weak — JS SPA</span></td>
+          <td><span class="win">45K — Strong</span></td>
+          <td><span class="lose">2,143 — Thin</span></td>
+          <td><span class="lose">Absent</span></td>
+          <td><span class="win">Integrated + Creative</span></td>
+        </tr>
+        <tr>
+          <td class="company-cell" style="color:var(--c1)">Amkenah</td>
+          <td><span class="mid">Moderate — Blog exists</span></td>
+          <td><span class="lose">Low — No scale</span></td>
+          <td><span class="lose">Thin</span></td>
+          <td><span class="mid">Partial — Industry blog</span></td>
+          <td><span class="mid">Reliable, not bold</span></td>
+        </tr>
+        <tr>
+          <td class="company-cell" style="color:var(--c2)">WOTN</td>
+          <td><span class="lose">Weak — No content</span></td>
+          <td><span class="mid">Moderate</span></td>
+          <td><span class="mid">Moderate</span></td>
+          <td><span class="lose">Absent</span></td>
+          <td><span class="mid">Credential-heavy</span></td>
+        </tr>
+        <tr>
+          <td class="company-cell" style="color:var(--c3)">Blink Experience</td>
+          <td><span class="win">Strong — Service pages</span></td>
+          <td><span class="win">66.9K — Dominant</span></td>
+          <td><span class="win">Active + Polished</span></td>
+          <td><span class="lose">Absent</span></td>
+          <td><span class="win">Premium + Proven</span></td>
+        </tr>
+        <tr>
+          <td class="company-cell" style="color:var(--c4)">Expand Expo</td>
+          <td><span class="lose">Minimal — Invisible</span></td>
+          <td><span class="lose">Minimal</span></td>
+          <td><span class="lose">Minimal</span></td>
+          <td><span class="lose">Absent</span></td>
+          <td><span class="mid">Authority by tenure</span></td>
+        </tr>
+        <tr>
+          <td class="company-cell" style="color:var(--c5)">Deep Vision</td>
+          <td><span class="lose">Weak</span></td>
+          <td><span class="lose">Fragmented</span></td>
+          <td><span class="lose">2,321 — Very thin</span></td>
+          <td><span class="lose">Absent</span></td>
+          <td><span class="mid">Niche craftsman</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ══ OPPORTUNITIES FOR PUREMINDS ══ -->
+<div>
+  <div class="sec-label">Strategic Insight</div>
+  <h2 class="sec-title">Where Pureminds <span>Can Win</span></h2>
+
+  <div class="opp-grid">
+    <div class="opp-card">
+      <div class="opp-icon">📣</div>
+      <div class="opp-title">Thought Leadership Gap</div>
+      <div class="opp-desc">Zero competitors publish meaningful industry insight content. The entire competitive set is silent between projects. Pureminds can own the "KSA events authority" position simply by publishing consistently — the field is completely open.</div>
+    </div>
+    <div class="opp-card">
+      <div class="opp-icon">📊</div>
+      <div class="opp-title">LinkedIn Content Engine</div>
+      <div class="opp-desc">Blink Experience has more followers (66K vs 45K), but no content strategy to activate them. Pureminds' 45K is still the #2 audience in the competitive set — and with proper content formats (carousels, polls, documents), could outperform Blink in reach despite smaller numbers.</div>
+    </div>
+    <div class="opp-card">
+      <div class="opp-icon">🔍</div>
+      <div class="opp-title">SEO — First-Mover Opportunity</div>
+      <div class="opp-desc">Only Blink has even partial SEO strategy. Amkenah has a blog but no technical SEO. WOTN, Expand Expo, and Deep Vision are invisible in organic search. Pureminds fixing its JavaScript SPA issue and adding service pages would immediately outrank most competitors for key KSA event queries.</div>
+    </div>
+    <div class="opp-card">
+      <div class="opp-icon">🎨</div>
+      <div class="opp-title">Integrated Creative + Production</div>
+      <div class="opp-desc">No competitor credibly combines brand strategy, creative, AV production, and media production under one roof. Pureminds' integrated model is its strongest differentiator — but it's underarticulated in their content. Making this visible is the priority.</div>
+    </div>
+    <div class="opp-card">
+      <div class="opp-icon">🤝</div>
+      <div class="opp-title">Employer Brand Advantage</div>
+      <div class="opp-desc">Both Pureminds and WOTN hold "Great Place to Work" certifications. Only Pureminds has the production capability to turn this into compelling visual content. Employee stories produced with Pureminds' own cameras would outclass anything competitors could produce.</div>
+    </div>
+    <div class="opp-card">
+      <div class="opp-icon">🌐</div>
+      <div class="opp-title">Bilingual Positioning for GCC</div>
+      <div class="opp-desc">Most competitors are Arabic-first or Arabic-only. Pureminds operating with a clear English presence on LinkedIn (tagline, About section, strategic posts) opens access to GCC corporate clients in UAE, Qatar, and Bahrain — a geography none of the direct competitors have claimed digitally.</div>
+    </div>
+  </div>
+</div>
+
+</main>
+
+<footer>
+  Prepared by <span>Shady El-Refaie</span> · Competitive Intelligence · May 2026
+  <br/>
+  Based on public web data, LinkedIn, and available digital presence · pureminds.com.sa
+</footer>
+
+</body>
+</html>

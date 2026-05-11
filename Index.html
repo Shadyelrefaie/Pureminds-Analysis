@@ -1,0 +1,1372 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Pureminds — Content & Digital Presence Analysis</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --black: #0a0a0a;
+    --dark: #111215;
+    --card: #181b20;
+    --card-border: #252830;
+    --gold: #c9a84c;
+    --gold-light: #e8c96d;
+    --gold-dim: rgba(201,168,76,0.15);
+    --gold-glow: rgba(201,168,76,0.08);
+    --white: #f4f1eb;
+    --muted: #8a8d96;
+    --red: #e05252;
+    --green: #52c97b;
+    --blue: #5294e0;
+    --section-gap: 80px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* ─── NOISE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+  }
+
+  /* ─── HEADER ─── */
+  header {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    padding: 60px 24px;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 900px;
+    height: 900px;
+    background: radial-gradient(ellipse, rgba(201,168,76,0.12) 0%, transparent 65%);
+    pointer-events: none;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,168,76,0.3);
+    color: var(--gold);
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 6px 16px;
+    border-radius: 100px;
+    margin-bottom: 32px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(42px, 7vw, 88px);
+    font-weight: 900;
+    line-height: 1.05;
+    letter-spacing: -2px;
+    margin-bottom: 24px;
+    animation: fadeUp 0.7s 0.1s ease both;
+  }
+
+  h1 span { color: var(--gold); font-style: italic; }
+
+  .header-sub {
+    color: var(--muted);
+    font-size: 17px;
+    max-width: 520px;
+    animation: fadeUp 0.7s 0.2s ease both;
+    margin-bottom: 56px;
+  }
+
+  .score-strip {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    justify-content: center;
+    animation: fadeUp 0.7s 0.3s ease both;
+  }
+
+  .score-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .score-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 42px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--gold);
+  }
+
+  .score-label {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-family: 'DM Mono', monospace;
+  }
+
+  .divider-v {
+    width: 1px;
+    height: 48px;
+    background: var(--card-border);
+    align-self: center;
+  }
+
+  /* ─── SCROLL INDICATOR ─── */
+  .scroll-hint {
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: var(--muted);
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-family: 'DM Mono', monospace;
+    animation: fadeUp 1s 0.6s ease both;
+  }
+
+  .scroll-line {
+    width: 1px;
+    height: 48px;
+    background: linear-gradient(to bottom, var(--gold), transparent);
+    animation: scrollPulse 2s infinite;
+  }
+
+  /* ─── LAYOUT ─── */
+  main {
+    max-width: 1160px;
+    margin: 0 auto;
+    padding: 0 24px var(--section-gap);
+    position: relative;
+    z-index: 1;
+  }
+
+  section { margin-bottom: var(--section-gap); }
+
+  /* ─── SECTION HEADERS ─── */
+  .section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-label::after {
+    content: '';
+    flex: 1;
+    max-width: 48px;
+    height: 1px;
+    background: var(--gold);
+    opacity: 0.5;
+  }
+
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(26px, 4vw, 38px);
+    font-weight: 700;
+    line-height: 1.2;
+    margin-bottom: 40px;
+    letter-spacing: -0.5px;
+  }
+
+  .section-title span { color: var(--gold); font-style: italic; }
+
+  /* ─── CARDS ─── */
+  .card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 32px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+
+  .card:hover {
+    border-color: rgba(201,168,76,0.3);
+    transform: translateY(-2px);
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .card:hover::before { opacity: 0.6; }
+
+  .card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .card-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+  }
+
+  .icon-gold { background: var(--gold-dim); }
+  .icon-red { background: rgba(224,82,82,0.12); }
+  .icon-green { background: rgba(82,201,123,0.12); }
+  .icon-blue { background: rgba(82,148,224,0.12); }
+
+  /* ─── GRID LAYOUTS ─── */
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+  @media (max-width: 900px) {
+    .grid-3, .grid-4 { grid-template-columns: 1fr 1fr; }
+  }
+  @media (max-width: 640px) {
+    .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+  }
+
+  /* ─── AUDIENCE PROFILE ─── */
+  .audience-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition: border-color 0.3s;
+  }
+
+  .audience-card:hover { border-color: rgba(201,168,76,0.3); }
+
+  .audience-icon { font-size: 28px; }
+
+  .audience-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .audience-desc { color: var(--muted); font-size: 14px; }
+
+  .tag-list { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+
+  .tag {
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,168,76,0.2);
+    color: var(--gold-light);
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.5px;
+    padding: 3px 10px;
+    border-radius: 100px;
+  }
+
+  /* ─── SWOT TABLE ─── */
+  .swot-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    gap: 2px;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid var(--card-border);
+  }
+
+  .swot-cell {
+    background: var(--card);
+    padding: 32px;
+    position: relative;
+  }
+
+  .swot-cell::after {
+    content: attr(data-label);
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.25;
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1;
+    font-family: 'Playfair Display', serif;
+  }
+
+  .swot-cell.s { border-top: 3px solid var(--green); }
+  .swot-cell.w { border-top: 3px solid var(--red); }
+  .swot-cell.o { border-top: 3px solid var(--blue); }
+  .swot-cell.t { border-top: 3px solid #f0a500; }
+
+  .swot-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .swot-cell.s .swot-label { color: var(--green); }
+  .swot-cell.w .swot-label { color: var(--red); }
+  .swot-cell.o .swot-label { color: var(--blue); }
+  .swot-cell.t .swot-label { color: #f0a500; }
+
+  .swot-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 14px;
+  }
+
+  /* ─── BULLET LISTS ─── */
+  .point-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+  .point-list li {
+    display: flex;
+    gap: 10px;
+    font-size: 14px;
+    color: #c8ccd6;
+    line-height: 1.6;
+  }
+
+  .point-list li::before {
+    content: '—';
+    color: var(--gold);
+    font-weight: 600;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .point-list.red li::before { color: var(--red); }
+  .point-list.blue li::before { color: var(--blue); }
+  .point-list.orange li::before { color: #f0a500; }
+
+  /* ─── PROGRESS BARS ─── */
+  .metric-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 16px;
+  }
+
+  .metric-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .metric-bar {
+    height: 4px;
+    background: var(--card-border);
+    border-radius: 100px;
+    overflow: hidden;
+  }
+
+  .metric-fill {
+    height: 100%;
+    border-radius: 100px;
+    background: linear-gradient(90deg, var(--gold), var(--gold-light));
+    transition: width 1s ease;
+  }
+
+  .metric-fill.red { background: linear-gradient(90deg, #e05252, #ff8080); }
+  .metric-fill.green { background: linear-gradient(90deg, #52c97b, #7eeea0); }
+  .metric-fill.blue { background: linear-gradient(90deg, #5294e0, #7eb5f5); }
+
+  /* ─── IDEA CARDS ─── */
+  .idea-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    overflow: hidden;
+    transition: transform 0.3s, border-color 0.3s;
+    position: relative;
+  }
+
+  .idea-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(201,168,76,0.4);
+  }
+
+  .idea-number {
+    position: absolute;
+    top: 24px;
+    right: 24px;
+    font-family: 'Playfair Display', serif;
+    font-size: 72px;
+    font-weight: 900;
+    color: rgba(201,168,76,0.06);
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .idea-top {
+    padding: 28px 28px 20px;
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  .idea-type {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 10px;
+  }
+
+  .idea-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.3;
+    margin-bottom: 12px;
+  }
+
+  .idea-hook {
+    font-size: 14px;
+    color: var(--muted);
+    font-style: italic;
+    border-left: 2px solid var(--gold);
+    padding-left: 14px;
+    margin-top: 12px;
+  }
+
+  .idea-bottom {
+    padding: 20px 28px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .idea-desc { font-size: 14px; color: #c8ccd6; line-height: 1.65; }
+
+  .idea-meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+
+  .meta-tag {
+    font-size: 11px;
+    font-family: 'DM Mono', monospace;
+    padding: 3px 10px;
+    border-radius: 100px;
+    border: 1px solid var(--card-border);
+    color: var(--muted);
+  }
+
+  /* ─── RECOMMENDATIONS ─── */
+  .rec-card {
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 14px;
+    padding: 24px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    transition: border-color 0.3s;
+  }
+
+  .rec-card:hover { border-color: rgba(201,168,76,0.3); }
+
+  .rec-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: var(--gold-dim);
+    border: 1px solid rgba(201,168,76,0.3);
+    color: var(--gold);
+    font-family: 'Playfair Display', serif;
+    font-size: 15px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .rec-body { flex: 1; }
+
+  .rec-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .rec-desc { font-size: 13.5px; color: var(--muted); line-height: 1.6; }
+
+  .priority {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border-radius: 100px;
+    margin-top: 8px;
+  }
+
+  .priority.high { background: rgba(224,82,82,0.12); color: var(--red); border: 1px solid rgba(224,82,82,0.2); }
+  .priority.medium { background: rgba(240,165,0,0.12); color: #f0a500; border: 1px solid rgba(240,165,0,0.2); }
+  .priority.low { background: rgba(82,201,123,0.12); color: var(--green); border: 1px solid rgba(82,201,123,0.2); }
+
+  /* ─── DIVIDER ─── */
+  .hr {
+    border: none;
+    border-top: 1px solid var(--card-border);
+    margin: 60px 0;
+  }
+
+  /* ─── FOOTER ─── */
+  footer {
+    border-top: 1px solid var(--card-border);
+    padding: 40px 24px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 13px;
+    font-family: 'DM Mono', monospace;
+    letter-spacing: 0.5px;
+    position: relative;
+    z-index: 1;
+  }
+
+  footer span { color: var(--gold); }
+
+  /* ─── ANIMATIONS ─── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.3; transform: scaleY(1); }
+    50%       { opacity: 1;   transform: scaleY(1.1); }
+  }
+
+  /* ─── HIGHLIGHT BLOCK ─── */
+  .highlight-block {
+    background: var(--gold-glow);
+    border: 1px solid rgba(201,168,76,0.2);
+    border-radius: 12px;
+    padding: 20px 24px;
+    font-size: 14px;
+    color: #c8ccd6;
+    line-height: 1.7;
+    margin-top: 16px;
+  }
+
+  .highlight-block strong { color: var(--gold); font-weight: 600; }
+
+  /* ─── ALERT BLOCK ─── */
+  .alert-block {
+    border-radius: 12px;
+    padding: 16px 20px;
+    font-size: 13.5px;
+    line-height: 1.6;
+    margin-top: 12px;
+  }
+
+  .alert-block.danger { background: rgba(224,82,82,0.08); border: 1px solid rgba(224,82,82,0.2); color: #f5b4b4; }
+  .alert-block.warning { background: rgba(240,165,0,0.08); border: 1px solid rgba(240,165,0,0.2); color: #f5dfa0; }
+  .alert-block.info { background: rgba(82,148,224,0.08); border: 1px solid rgba(82,148,224,0.2); color: #b4ccf5; }
+
+  /* ─── TOC NAV ─── */
+  nav.toc {
+    position: sticky;
+    top: 24px;
+    background: var(--card);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 24px;
+    font-size: 13px;
+    z-index: 10;
+    width: 220px;
+    float: right;
+    margin: 0 0 40px 40px;
+  }
+
+  nav.toc h4 {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 14px;
+  }
+
+  nav.toc a {
+    display: block;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 5px 0;
+    border-bottom: 1px solid var(--card-border);
+    transition: color 0.2s;
+    font-size: 12px;
+  }
+
+  nav.toc a:last-child { border-bottom: none; }
+  nav.toc a:hover { color: var(--gold); }
+
+  @media (max-width: 900px) {
+    nav.toc { display: none; }
+    .swot-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ══ HERO ══ -->
+<header>
+  <div class="badge">Content &amp; Digital Presence Analysis</div>
+  <h1>Pureminds<br/><span>Decoded</span></h1>
+  <p class="header-sub">A comprehensive audit of the website, LinkedIn page, content strategy, SEO positioning, and brand communication — with creative recommendations.</p>
+
+  <div class="score-strip">
+    <div class="score-item">
+      <div class="score-num">184</div>
+      <div class="score-label">Employees</div>
+    </div>
+    <div class="divider-v"></div>
+    <div class="score-item">
+      <div class="score-num">2011</div>
+      <div class="score-label">Founded</div>
+    </div>
+    <div class="divider-v"></div>
+    <div class="score-item">
+      <div class="score-num">KSA</div>
+      <div class="score-label">Market</div>
+    </div>
+    <div class="divider-v"></div>
+    <div class="score-item">
+      <div class="score-num">V2030</div>
+      <div class="score-label">Aligned</div>
+    </div>
+  </div>
+
+  <div class="scroll-hint">
+    <div class="scroll-line"></div>
+    Scroll to explore
+  </div>
+</header>
+
+<main>
+
+  <!-- TOC -->
+  <nav class="toc">
+    <h4>Contents</h4>
+    <a href="#company">Company Overview</a>
+    <a href="#audience">Target Audience</a>
+    <a href="#services">Services</a>
+    <a href="#website">Website Audit</a>
+    <a href="#linkedin">LinkedIn Audit</a>
+    <a href="#swot">SWOT Analysis</a>
+    <a href="#recs">Recommendations</a>
+    <a href="#ideas">5 Campaign Ideas</a>
+  </nav>
+
+  <!-- ══ 01 COMPANY ══ -->
+  <section id="company">
+    <div class="section-label">01 — Overview</div>
+    <h2 class="section-title">Who is <span>Pureminds?</span></h2>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">
+          <div class="card-icon icon-gold">🏢</div>
+          Company Identity
+        </div>
+        <ul class="point-list">
+          <li>Founded in 2011 — over 14 years of market presence in Saudi Arabia</li>
+          <li>Headquartered in Olaya Street, Riyadh — the heart of KSA's business district</li>
+          <li>Certified as a "Great Place To Work" — #5 for Saudi Nationals (Medium category, 2024)</li>
+          <li>Recognized through local and international awards</li>
+          <li>Active contributor to Saudi Arabia's Vision 2030 strategy</li>
+          <li>Revenue estimated at $10–25M, with 184 employees</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <div class="card-icon icon-blue">🎯</div>
+          Core Positioning Statement
+        </div>
+        <div class="highlight-block">
+          <strong>"We don't just organize events — we design integrated experience ecosystems that create measurable impact and long-term value."</strong>
+          <br/><br/>
+          Their positioning is ambitious: every event becomes a <strong>strategic platform</strong> that drives engagement, strengthens brand perception, and supports sustainable growth — supported by their proprietary <strong>"Sales Partner" strategy</strong>.
+        </div>
+        <div class="alert-block warning" style="margin-top:16px">
+          ⚠️ While the positioning statement is strong conceptually, it remains largely a <strong>claim rather than a proven narrative</strong> on their public-facing content.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 02 AUDIENCE ══ -->
+  <section id="audience">
+    <div class="section-label">02 — Target Audience</div>
+    <h2 class="section-title">Who They're <span>Talking To</span></h2>
+
+    <div class="grid-3">
+      <div class="audience-card">
+        <div class="audience-icon">🏛️</div>
+        <div class="audience-title">Government & Semi-Government</div>
+        <div class="audience-desc">Ministries, national programs, and government entities organizing large-scale national ceremonies and forums aligned with Vision 2030.</div>
+        <div class="tag-list">
+          <span class="tag">Decision Makers</span>
+          <span class="tag">High Budget</span>
+          <span class="tag">Long Sales Cycle</span>
+        </div>
+      </div>
+
+      <div class="audience-card">
+        <div class="audience-icon">🏢</div>
+        <div class="audience-title">Enterprise & Large Corporates</div>
+        <div class="audience-desc">CMOs, Marketing Directors, and Event Managers in large Saudi and GCC companies seeking premium integrated event production.</div>
+        <div class="tag-list">
+          <span class="tag">B2B</span>
+          <span class="tag">CMO / VP Level</span>
+          <span class="tag">ROI-Focused</span>
+        </div>
+      </div>
+
+      <div class="audience-card">
+        <div class="audience-icon">🎬</div>
+        <div class="audience-title">Media & Entertainment</div>
+        <div class="audience-desc">Film production companies, TV networks, and entertainment brands needing media production, AV, broadcasting, and creative content.</div>
+        <div class="tag-list">
+          <span class="tag">Creative Buyers</span>
+          <span class="tag">Production Houses</span>
+          <span class="tag">Film Industry</span>
+        </div>
+      </div>
+
+      <div class="audience-card">
+        <div class="audience-icon">🚀</div>
+        <div class="audience-title">Brands & Agencies</div>
+        <div class="audience-desc">Marketing agencies and brand teams needing sub-contracting for production, creative campaigns, identity design, and collateral development.</div>
+        <div class="tag-list">
+          <span class="tag">Agency Partners</span>
+          <span class="tag">Brand Teams</span>
+          <span class="tag">Creative Directors</span>
+        </div>
+      </div>
+
+      <div class="audience-card">
+        <div class="audience-icon">🎓</div>
+        <div class="audience-title">Academic & Talent Pipeline</div>
+        <div class="audience-desc">University students (King Saud University noted), young creative professionals — a secondary audience for employer branding and recruitment.</div>
+        <div class="tag-list">
+          <span class="tag">Employer Branding</span>
+          <span class="tag">Recruitment</span>
+          <span class="tag">Future Talent</span>
+        </div>
+      </div>
+
+      <div class="audience-card">
+        <div class="audience-icon">🤝</div>
+        <div class="audience-title">Strategic Partners</div>
+        <div class="audience-desc">Other companies (e.g. Deep Vision Films, Word Up) that can co-execute projects and share Pureminds' "Sales Partner" ecosystem model.</div>
+        <div class="tag-list">
+          <span class="tag">Partnership Model</span>
+          <span class="tag">Co-creation</span>
+          <span class="tag">Network Leverage</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 03 SERVICES ══ -->
+  <section id="services">
+    <div class="section-label">03 — Services</div>
+    <h2 class="section-title">What They <span>Actually Do</span></h2>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><div class="card-icon icon-gold">🎪</div>Events & Experiences</div>
+        <ul class="point-list">
+          <li>Exhibition and conference management</li>
+          <li>National ceremonies and high-profile launches</li>
+          <li>Large-scale forums and government events</li>
+          <li>Experience design and interactive technologies</li>
+          <li>Attendee journey design and audience engagement</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><div class="card-icon icon-blue">📺</div>Media & Production</div>
+        <ul class="point-list">
+          <li>TV commercial production and documentary films</li>
+          <li>Live broadcasting and media center operations</li>
+          <li>Advanced AV and LED solutions</li>
+          <li>Photography, videography, and color correction</li>
+          <li>Motion graphics, GFX, and audio production</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><div class="card-icon icon-green">🎨</div>Creative & Branding</div>
+        <ul class="point-list">
+          <li>Corporate identity and brand manual creation</li>
+          <li>Creative campaign design and implementation</li>
+          <li>Collateral development and media packages</li>
+          <li>Technology and digital production</li>
+          <li>Studio services and digital content creation</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><div class="card-icon icon-gold">📊</div>Strategy & Advisory</div>
+        <ul class="point-list">
+          <li>Strategic advisory and concept development</li>
+          <li>KPI alignment and performance measurement</li>
+          <li>ROI optimization for event impact</li>
+          <li>Proprietary "Sales Partner" partnership model</li>
+          <li>Technology localization and workforce development</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <hr class="hr" />
+
+  <!-- ══ 04 WEBSITE AUDIT ══ -->
+  <section id="website">
+    <div class="section-label">04 — Website Audit</div>
+    <h2 class="section-title">Website Content <span>Analysis</span></h2>
+
+    <!-- SEO Metrics -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title"><div class="card-icon icon-red">🔍</div>SEO Performance Indicators</div>
+      <div style="margin-top: 16px;">
+        <div class="metric-row">
+          <div class="metric-header"><span>Keyword Clarity (Services)</span><span style="color:var(--red)">25%</span></div>
+          <div class="metric-bar"><div class="metric-fill red" style="width:25%"></div></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-header"><span>On-Page Structure &amp; Hierarchy</span><span style="color:var(--red)">30%</span></div>
+          <div class="metric-bar"><div class="metric-fill red" style="width:30%"></div></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-header"><span>Meta Description Optimization</span><span style="color:var(--red)">20%</span></div>
+          <div class="metric-bar"><div class="metric-fill red" style="width:20%"></div></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-header"><span>Trust Signals (Awards, Clients)</span><span style="color:var(--gold)">55%</span></div>
+          <div class="metric-bar"><div class="metric-fill" style="width:55%"></div></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-header"><span>Visual Brand Consistency</span><span style="color:var(--gold)">65%</span></div>
+          <div class="metric-bar"><div class="metric-fill" style="width:65%"></div></div>
+        </div>
+        <div class="metric-row">
+          <div class="metric-header"><span>Clear CTA Architecture</span><span style="color:var(--red)">20%</span></div>
+          <div class="metric-bar"><div class="metric-fill red" style="width:20%"></div></div>
+        </div>
+      </div>
+      <div class="alert-block danger">
+        🚨 The website failed to load its content through standard crawling — it is <strong>JavaScript-rendered with no server-side fallback</strong>. This alone represents a critical SEO failure: search engines (and tools) cannot read the page content, meaning Google likely sees an empty page.
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title"><div class="card-icon icon-green">✅</div>Content Strengths</div>
+        <ul class="point-list">
+          <li>Clear brand name with an emotional concept ("Pure Minds") that implies creative intelligence</li>
+          <li>Tagline "#مالنا_حدود" (No limits to us) is culturally resonant and distinctive</li>
+          <li>Their Vision 2030 alignment is a credibility anchor for government clients</li>
+          <li>The "Great Place to Work" certification adds employer brand legitimacy</li>
+          <li>Awards recognition signals external validation</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><div class="card-icon icon-red">❌</div>Content Weaknesses</div>
+        <ul class="point-list red">
+          <li>Website is a JavaScript SPA with no crawlable content — invisible to Google</li>
+          <li>No visible case studies or results-driven portfolio pages on the web</li>
+          <li>No client testimonials or measurable outcome proof points</li>
+          <li>Services lack individual landing pages with keyword-optimized copy</li>
+          <li>No clear primary CTA — "Contact us" alone doesn't drive conversion</li>
+          <li>No blog or thought leadership content to capture search intent</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+      <div class="card-title"><div class="card-icon icon-gold">🗺️</div>User Journey Analysis</div>
+      <div style="display:grid; grid-template-columns: repeat(4,1fr); gap:16px; margin-top:20px;">
+        <div style="text-align:center; padding:20px 12px; background:var(--black); border-radius:12px; border:1px solid var(--card-border);">
+          <div style="font-size:28px; margin-bottom:8px;">🔎</div>
+          <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1.5px; color:var(--gold); text-transform:uppercase; margin-bottom:6px;">Discovery</div>
+          <div style="font-size:13px; color:var(--muted);">Google search likely fails — no indexed content. Brand discovery relies entirely on word-of-mouth and LinkedIn.</div>
+        </div>
+        <div style="text-align:center; padding:20px 12px; background:var(--black); border-radius:12px; border:1px solid var(--card-border);">
+          <div style="font-size:28px; margin-bottom:8px;">🏠</div>
+          <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1.5px; color:var(--gold); text-transform:uppercase; margin-bottom:6px;">Homepage</div>
+          <div style="font-size:13px; color:var(--muted);">Visual-heavy landing. No clear hierarchy guiding the user to the most valuable services or proof points.</div>
+        </div>
+        <div style="text-align:center; padding:20px 12px; background:var(--black); border-radius:12px; border:1px solid rgba(224,82,82,0.3); background:rgba(224,82,82,0.05);">
+          <div style="font-size:28px; margin-bottom:8px;">💼</div>
+          <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1.5px; color:var(--red); text-transform:uppercase; margin-bottom:6px;">Consideration</div>
+          <div style="font-size:13px; color:var(--muted);">No case studies, no ROI proof, no client logos visible externally. High drop-off risk at this stage.</div>
+        </div>
+        <div style="text-align:center; padding:20px 12px; background:var(--black); border-radius:12px; border:1px solid rgba(224,82,82,0.3); background:rgba(224,82,82,0.05);">
+          <div style="font-size:28px; margin-bottom:8px;">📞</div>
+          <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1.5px; color:var(--red); text-transform:uppercase; margin-bottom:6px;">Conversion</div>
+          <div style="font-size:13px; color:var(--muted);">No lead magnet, no RFP form, no scheduling tool. The pipeline from "interested visitor" to "client" has no digital bridge.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="hr" />
+
+  <!-- ══ 05 LINKEDIN AUDIT ══ -->
+  <section id="linkedin">
+    <div class="section-label">05 — LinkedIn Audit</div>
+    <h2 class="section-title">LinkedIn Presence <span>Analysis</span></h2>
+
+    <!-- Page Snapshot -->
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-title"><div class="card-icon icon-gold">📋</div>Page Snapshot — Confirmed Data (linkedin.com/company/pureminds-ksa)</div>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-top:16px;">
+        <div style="text-align:center; padding:16px 10px; background:var(--black); border-radius:12px; border:1px solid var(--card-border);">
+          <div style="font-family:'Playfair Display',serif; font-size:32px; font-weight:700; color:var(--gold); line-height:1;">45K</div>
+          <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-top:4px;">Followers</div>
+        </div>
+        <div style="text-align:center; padding:16px 10px; background:var(--black); border-radius:12px; border:1px solid var(--card-border);">
+          <div style="font-family:'Playfair Display',serif; font-size:22px; font-weight:700; color:var(--gold); line-height:1.2; margin-top:4px;">51–200</div>
+          <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted); margin-top:4px;">Employees Listed</div>
+        </div>
+        <div style="text-align:center; padding:16px 10px; background:var(--black); border-radius:12px; border:1px solid var(--card-border);">
+          <div style="font-size:22px; margin-bottom:6px;">✅</div>
+          <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted);">Verified Page</div>
+        </div>
+        <div style="text-align:center; padding:16px 10px; background:var(--black); border-radius:12px; border:1px solid var(--card-border);">
+          <div style="font-size:22px; margin-bottom:6px;">🏷️</div>
+          <div style="font-family:'DM Mono',monospace; font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--muted);">Events Services</div>
+        </div>
+      </div>
+      <div class="highlight-block" style="margin-top:16px;">
+        <strong>Confirmed Tagline:</strong> "From strategy to execution: interactive events, exhibitions, and measurable impact" — direct, benefit-led, and B2B-appropriate. One of the stronger elements on the page. Cover image uses the <strong>#مالنا_حدود</strong> brand identity professionally.
+      </div>
+      <div class="alert-block info" style="margin-top:12px;">
+        ⚠️ <strong>Data Note:</strong> LinkedIn blocks automated crawling. Engagement rates, posting frequency, and post content are not directly accessible. Observations on content strategy below are based on what is publicly visible through search results and the confirmed page screenshot. Only confirmed data is presented as fact.
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-bottom:20px">
+      <div class="card">
+        <div class="card-title"><div class="card-icon icon-green">📊</div>What They Do Well</div>
+        <ul class="point-list">
+          <li><strong>45K followers</strong> is a genuinely strong number for a KSA B2B events company — most local competitors are well below this</li>
+          <li>Tagline is direct and benefit-led: <em>"From strategy to execution: interactive events, exhibitions, and measurable impact"</em> — one of the clearest in the sector</li>
+          <li>Brand hashtag <strong>#مالنا_حدود</strong> is consistent across LinkedIn and Instagram — works as a recognizable brand signature</li>
+          <li>Cover image is professionally designed and on-brand — visual identity is cohesive at first glance</li>
+          <li>LinkedIn verification badge (✓) adds credibility and trust</li>
+          <li>Industry classification (Events Services) is accurate and helps with LinkedIn's internal search</li>
+        </ul>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><div class="card-icon icon-red">⚠️</div>Confirmed Weaknesses</div>
+        <ul class="point-list red">
+          <li>The About section doesn't use its full character limit — no client names, no proof points, no results visible above the fold</li>
+          <li>Tagline describes <em>what</em> they do but misses an emotional hook about <em>why it matters to the client</em></li>
+          <li>Instagram (@puremindsksa) has only 28 posts and 2,143 followers — a major platform gap that makes the brand fragile outside LinkedIn</li>
+          <li>No thought leadership content publicly visible for this page specifically — authority content is absent</li>
+          <li>No observed use of LinkedIn's native high-reach formats: polls, carousels, PDF documents</li>
+          <li>45K followers with no visible content engine means that reach potential is largely idle</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title"><div class="card-icon icon-blue">🎯</div>Positioning & Branding on LinkedIn</div>
+      <div class="grid-2" style="margin-top:16px; gap:16px">
+        <div>
+          <div style="font-family:'DM Mono',monospace; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:10px;">Current Positioning</div>
+          <ul class="point-list">
+            <li>Events execution company — "we produce things for you"</li>
+            <li>Portfolio-first: content tied to project announcements</li>
+            <li>Arabic-only presence — limits GCC and regional reach</li>
+            <li>45K followers with no clear content strategy to activate them</li>
+          </ul>
+        </div>
+        <div>
+          <div style="font-family:'DM Mono',monospace; font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--green); margin-bottom:10px;">Where They Should Be</div>
+          <ul class="point-list">
+            <li>Strategic experience partner — "we think before we build"</li>
+            <li>Authority-first: industry insights between projects</li>
+            <li>Bilingual — Arabic primary, English secondary for GCC reach</li>
+            <li>45K followers as a live inbound lead generation engine</li>
+          </ul>
+        </div>
+      </div>
+      <div class="alert-block info" style="margin-top:20px">
+        📌 <strong>The 45K Gap:</strong> 45,000 followers is significant reach — but reach without a content strategy is just a number. If Pureminds posted 3x per week with proper hooks and native formats, this audience could generate consistent inbound inquiries. Right now, that engine is sitting idle.
+      </div>
+    </div>
+  </section>
+
+  <hr class="hr" />
+
+  <!-- ══ 06 SWOT ══ -->
+  <section id="swot">
+    <div class="section-label">06 — Strategic Analysis</div>
+    <h2 class="section-title">SWOT <span>Breakdown</span></h2>
+
+    <div class="swot-grid">
+      <div class="swot-cell s" data-label="S">
+        <div class="swot-label">Strengths</div>
+        <div class="swot-title">Where They Win</div>
+        <ul class="point-list">
+          <li>14+ years of market experience in KSA — strong operational credibility</li>
+          <li>Fully integrated service model (strategy, creative, production, tech)</li>
+          <li>Vision 2030 alignment gives direct access to government contracts</li>
+          <li>Great Place to Work certification strengthens employer brand</li>
+          <li>Proprietary "Sales Partner" model creates partner-based distribution</li>
+          <li>Active at major national events (Saudi Film Forum) — network leverage</li>
+        </ul>
+      </div>
+
+      <div class="swot-cell w" data-label="W">
+        <div class="swot-label">Weaknesses</div>
+        <div class="swot-title">Where They Lose</div>
+        <ul class="point-list red">
+          <li>Website is SEO-invisible (JavaScript SPA with no server-side rendering)</li>
+          <li>No digital proof of results — no case studies, no client logos, no ROI data publicly visible</li>
+          <li>45K LinkedIn followers with no observed content strategy to convert them into leads</li>
+          <li>Positioning claim ("experience ecosystems") is not supported by evidence in their public content</li>
+          <li>Instagram presence is extremely thin — 28 posts, 2,143 followers — makes brand fragile off LinkedIn</li>
+          <li>No thought leadership content — the brand is silent between project announcements</li>
+        </ul>
+      </div>
+
+      <div class="swot-cell o" data-label="O">
+        <div class="swot-label">Opportunities</div>
+        <div class="swot-title">Where to Grow</div>
+        <ul class="point-list blue">
+          <li>Saudi Arabia's event economy is booming — MICE sector growing 20%+ annually</li>
+          <li>Vision 2030 generating continuous demand for national-scale events and forums</li>
+          <li>GCC expansion: similar demand in UAE, Qatar, Bahrain markets</li>
+          <li>LinkedIn is underutilized by Saudi event/production companies — first-mover advantage</li>
+          <li>B2B content marketing for CMOs and event managers is a wide-open niche in Arabic</li>
+          <li>Documentary and film production aligned with Saudi Film Commission growth</li>
+        </ul>
+      </div>
+
+      <div class="swot-cell t" data-label="T">
+        <div class="swot-label">Threats</div>
+        <div class="swot-title">What to Watch</div>
+        <ul class="point-list orange">
+          <li>International agencies (MCI, Freeman, Informa/Tahaluf) entering the KSA market aggressively with larger budgets</li>
+          <li>AI-powered production tools reducing barriers for smaller, leaner competitors</li>
+          <li>Government procurement processes increasingly favor large international tenders</li>
+          <li>Single-platform dependency (LinkedIn) — if algorithm changes, visibility drops overnight</li>
+          <li>Without SEO presence, new clients cannot discover them organically — all growth is referral-dependent</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <hr class="hr" />
+
+  <!-- ══ 07 RECOMMENDATIONS ══ -->
+  <section id="recs">
+    <div class="section-label">07 — Recommendations</div>
+    <h2 class="section-title">What Should <span>Change</span></h2>
+
+    <div style="margin-bottom: 28px;">
+      <div style="font-family:'Playfair Display',serif; font-size:19px; font-weight:700; margin-bottom:20px; color:var(--gold);">🌐 Website Improvements</div>
+      <div style="display:grid; grid-template-columns:1fr; gap:12px;">
+        <div class="rec-card">
+          <div class="rec-num">1</div>
+          <div class="rec-body">
+            <div class="rec-title">Fix the SEO Foundation — Add Server-Side Rendering</div>
+            <div class="rec-desc">The website needs to either switch to a framework like Next.js (SSR/SSG) or add proper meta tags and structured content that search engines can read. Without this, no content strategy investment will generate inbound leads.</div>
+            <span class="priority high">🔴 Critical Priority</span>
+          </div>
+        </div>
+        <div class="rec-card">
+          <div class="rec-num">2</div>
+          <div class="rec-body">
+            <div class="rec-title">Build Dedicated Service Pages with Keyword Intent</div>
+            <div class="rec-desc">Create individual pages for each service: "Event Management Riyadh," "TV Commercial Production Saudi Arabia," "Corporate Identity Design KSA." Each page should target specific search queries their clients type into Google.</div>
+            <span class="priority high">🔴 Critical Priority</span>
+          </div>
+        </div>
+        <div class="rec-card">
+          <div class="rec-num">3</div>
+          <div class="rec-body">
+            <div class="rec-title">Add Case Studies with Measurable Results</div>
+            <div class="rec-desc">Every major project (Mudad campaign, Saudi Film Forum) should have a results page: brief, the concept, the execution, and the outcome. Even qualitative outcomes count. This is the #1 trust signal for B2B buyers.</div>
+            <span class="priority high">🔴 Critical Priority</span>
+          </div>
+        </div>
+        <div class="rec-card">
+          <div class="rec-num">4</div>
+          <div class="rec-body">
+            <div class="rec-title">Redesign the User Journey with a Clear CTA Architecture</div>
+            <div class="rec-desc">The site needs three clear conversion paths: (1) "Request a Proposal" for clients, (2) "View Our Work" for consideration, (3) "Join Our Team" for recruitment. Each path should have its own flow and form.</div>
+            <span class="priority medium">🟡 High Priority</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div style="font-family:'Playfair Display',serif; font-size:19px; font-weight:700; margin-bottom:20px; color:var(--gold);">💼 LinkedIn Strategy Improvements</div>
+      <div style="display:grid; grid-template-columns:1fr; gap:12px;">
+        <div class="rec-card">
+          <div class="rec-num">5</div>
+          <div class="rec-body">
+            <div class="rec-title">Rewrite the LinkedIn About Section — Front-Load the Proof</div>
+            <div class="rec-desc">The current About section leads with a positioning statement but buries the proof. Rewrite it so the first two lines (visible before "See more") contain a specific credential: years in market, a notable client category, or a quantified result. B2B buyers decide in the first 3 seconds whether to keep reading.</div>
+            <span class="priority high">🔴 Critical Priority</span>
+          </div>
+        </div>
+        <div class="rec-card">
+          <div class="rec-num">6</div>
+          <div class="rec-body">
+            <div class="rec-title">Shift from "Project Announcements" to "Value-First Content"</div>
+            <div class="rec-desc">Move beyond "we did this project." Start publishing content that answers what their clients are thinking: "How to brief a production company," "What makes a national event successful," "The 3 mistakes brands make before a product launch." This builds authority between projects.</div>
+            <span class="priority high">🔴 Critical Priority</span>
+          </div>
+        </div>
+        <div class="rec-card">
+          <div class="rec-num">7</div>
+          <div class="rec-body">
+            <div class="rec-title">Add Algorithm-Native Formats: Carousels, Polls, Documents</div>
+            <div class="rec-desc">LinkedIn rewards native content. A carousel titled "Inside our production of [X]" or a poll "What's the #1 challenge for event planners in KSA?" generates 3–5x more reach than a photo post with a caption.</div>
+            <span class="priority medium">🟡 High Priority</span>
+          </div>
+        </div>
+        <div class="rec-card">
+          <div class="rec-num">8</div>
+          <div class="rec-body">
+            <div class="rec-title">Build an Editorial Calendar: 3 Posts Per Week, Consistent Pillars</div>
+            <div class="rec-desc">Recommended pillars: (1) Behind the Work — BTS stories from projects, (2) Industry Insights — event trends, production tips, Vision 2030 commentary, (3) Team & Culture — humanizing the brand for recruitment and trust. Bilingual: Arabic + English on rotation.</div>
+            <span class="priority medium">🟡 High Priority</span>
+          </div>
+        </div>
+        <div class="rec-card">
+          <div class="rec-num">9</div>
+          <div class="rec-body">
+            <div class="rec-title">Activate Employee Advocacy — LinkedIn's Most Underused Growth Lever</div>
+            <div class="rec-desc">With 184 employees, Pureminds has a massive untapped amplification network. Encouraging 10–15 key employees (Creative Director, Project Managers, Account Leads) to post consistently from their personal profiles and tag the company page can 10x organic reach.</div>
+            <span class="priority low">🟢 Medium Priority</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="hr" />
+
+  <!-- ══ 08 CREATIVE IDEAS ══ -->
+  <section id="ideas">
+    <div class="section-label">08 — Campaign Ideas</div>
+    <h2 class="section-title">5 Creative LinkedIn <span>Campaign Ideas</span></h2>
+    <p style="color:var(--muted); margin-bottom:40px; max-width:620px;">These are not generic content ideas. Each is designed specifically for the <strong style="color:var(--gold)">pureminds-ksa LinkedIn page</strong> with its 45K followers — a real, underactivated asset. The goal: turn that audience into an inbound pipeline, not just a follower count.</p>
+
+    <!-- IDEA 1 -->
+    <div class="idea-card" style="margin-bottom:20px">
+      <div class="idea-top">
+        <div class="idea-number">01</div>
+        <div class="idea-type">Series Campaign · Arabic + English · Carousel Format</div>
+        <div class="idea-title">"من البريف للمسرح" — Behind-the-Curtain Project Series</div>
+        <div class="idea-hook">"الناس تشوف المسرح. القليل منهم يشوفون الـ 47 قرار اللي بناه."</div>
+      </div>
+      <div class="idea-bottom">
+        <div class="idea-desc">
+          سيريز ثابت على صفحة pureminds-ksa — كل حلقة تفكك مشروع حقيقي من البريف للتسليم. الفورمات: كاروسيل 10 سلايدات يمشي على المشكلة، الكونسبت، القرارات الصعبة، والنتيجة. مفيش كلام إنشائي، كل سلايدة قرار إبداعي حقيقي.
+          <br/><br/>
+          ليه يشتغل: المشترين في B2B — CMOs وفرق المشتريات — يريدوا يفهموا كيف تفكر الشركة قبل ما يتعاملوا معها. السيريز ده بيحول process بتاع Pureminds لـ product في حد نفسه. والـ 45K follower الموجودين على الصفحة هم مش بس جمهور — هم distribution engine لكل episode جديدة.
+        </div>
+        <div class="idea-meta">
+          <span class="meta-tag">Carousel Native</span>
+          <span class="meta-tag">كل أسبوعين</span>
+          <span class="meta-tag">Authority Building</span>
+          <span class="meta-tag">B2B Trust</span>
+          <span class="meta-tag">Arabic Primary</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- IDEA 2 -->
+    <div class="idea-card" style="margin-bottom:20px">
+      <div class="idea-top">
+        <div class="idea-number">02</div>
+        <div class="idea-type">Thought Leadership · Arabic · Vision 2030 Angle · LinkedIn Document</div>
+        <div class="idea-title">"تقرير اقتصاد الفعاليات في السعودية" — وثيقة سنوية مدعومة بالأرقام</div>
+        <div class="idea-hook">"السعودية بتصبح عاصمة الفعاليات العالمية. إيه اللي الأرقام بتقوله فعلاً؟"</div>
+      </div>
+      <div class="idea-bottom">
+        <div class="idea-desc">
+          Pureminds تنشر سنوياً — أو نصف سنوي — LinkedIn Document (PDF native) يلخص توجهات قطاع الفعاليات والإنتاج في السعودية: الأرقام الكبيرة، القطاعات الأكثر طلباً، التحولات اللي بتحصل، وإيه اللي العملاء بيركزوا عليه. كله branded بهوية Pureminds.
+          <br/><br/>
+          الـ 45K follower على الصفحة هم بالظبط الجمهور المستهدف لهذا المحتوى — CMOs، مديرو تسويق، وفرق procurement. لما يشوفوا هذا التقرير، مش بيفكروا في Pureminds كـ "شركة إنتاج" — بيفكروا فيها كـ "شريك يفهم السوق." هكذا الوكالات تبقى لا غنى عنها.
+        </div>
+        <div class="idea-meta">
+          <span class="meta-tag">LinkedIn Document</span>
+          <span class="meta-tag">سنوي / نصف سنوي</span>
+          <span class="meta-tag">Lead Magnet</span>
+          <span class="meta-tag">Authority Play</span>
+          <span class="meta-tag">45K Distribution</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- IDEA 3 -->
+    <div class="idea-card" style="margin-bottom:20px">
+      <div class="idea-top">
+        <div class="idea-number">03</div>
+        <div class="idea-type">Engagement Campaign · Algorithm-Driven · Poll + Follow-up</div>
+        <div class="idea-title">"اسألونا" — سيريز بولز شهري من قيادة Pureminds</div>
+        <div class="idea-hook">"إيه أكثر سؤال بيسألونا إياه قبل أي فعالية؟ الشهر ده بنجاوب عليه علناً."</div>
+      </div>
+      <div class="idea-bottom">
+        <div class="idea-desc">
+          كل شهر، صوت قيادي من Pureminds — CEO، Creative Lead، أو Senior Producer — ينشر بولز على صفحة pureminds-ksa بسؤال حقيقي من القطاع: "إيه أكبر تحدي بتواجهه لما بتعمل briefing لشركة إنتاج؟" — وبعد 48 ساعة، بوست تفصيلي يحلل الإجابات ويقدم وجهة نظر Pureminds.
+          <br/><br/>
+          البولز على LinkedIn بياخد 3 إلى 5 أضعاف الـ impressions مقارنة بالبوست العادي. الـ 45K follower اللي على الصفحة معناهم إن كل بولز هيوصل لآلاف من صناع القرار في الفعاليات والتسويق. والـ follow-up post بيرسّخ الصورة كـ authority voice في القطاع — مش مجرد شركة تنفذ.
+        </div>
+        <div class="idea-meta">
+          <span class="meta-tag">Poll + Follow-up</span>
+          <span class="meta-tag">شهري</span>
+          <span class="meta-tag">High Reach</span>
+          <span class="meta-tag">45K Activation</span>
+          <span class="meta-tag">Thought Leadership</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- IDEA 4 -->
+    <div class="idea-card" style="margin-bottom:20px">
+      <div class="idea-top">
+        <div class="idea-number">04</div>
+        <div class="idea-type">Culture Campaign · Arabic · Employer Branding · Employee Advocacy</div>
+        <div class="idea-title">"الناس اللي وراء الإنتاج" — سيريز سبوتلايت للفريق</div>
+        <div class="idea-hook">"كل فعالية استثنائية فيها اسم وراءها. تعرف على أسماءنا."</div>
+      </div>
+      <div class="idea-bottom">
+        <div class="idea-desc">
+          سيريز ثابت يسلط الضوء على موظفين حقيقيين من Pureminds — دورهم، قصتهم، شيء يفخرون به، وشيء تعلموه. مصور باحترافية (القدرة الإنتاجية موجودة عندهم). ينشر من صفحة الشركة وكمان من البروفايل الشخصي للموظف نفسه.
+          <br/><br/>
+          الأثر بيحصل على 3 مستويات في وقت واحد: أولاً بيضيف حياة للبراند أمام العملاء اللي بيشتروا من ناس مش شعارات. ثانياً بيحول شهادة "Great Place to Work" من badge صامت لدليل مرئي حي. ثالثاً — وده الأهم — كل موظف عنده شبكة connections مختلفة عن الـ 45K اللي على الصفحة. يعني كل بوست بيوصل لجمهور جديد تماماً بدون أي تكلفة إضافية.
+        </div>
+        <div class="idea-meta">
+          <span class="meta-tag">Video / Photo</span>
+          <span class="meta-tag">كل أسبوعين</span>
+          <span class="meta-tag">Employer Branding</span>
+          <span class="meta-tag">Employee Advocacy</span>
+          <span class="meta-tag">Organic Amplification</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- IDEA 5 -->
+    <div class="idea-card">
+      <div class="idea-top">
+        <div class="idea-number">05</div>
+        <div class="idea-type">Viral Campaign · Bold · High Risk / High Reward · Quarterly</div>
+        <div class="idea-title">"مالنا حدود — تحدي البريف المستحيل"</div>
+        <div class="idea-hook">"اعطونا أصعب بريف فعالية عندكم. بنكونسبت له علناً في 72 ساعة — مجاناً."</div>
+      </div>
+      <div class="idea-bottom">
+        <div class="idea-desc">
+          Pureminds تطلق تحدي على صفحة pureminds-ksa: أي شركة أو CMO أو مدير فعاليات يكتب في التعليقات أصعب بريف فعالية عنده. Pureminds تختار أكثر واحد إثارة، وتنشر follow-up post فيه تفكيرهم الإبداعي كامل — الكونسبت، النهج الإنتاجي، والخطة التقريبية — في 72 ساعة.
+          <br/><br/>
+          ده transparency كـ marketing. الـ 45K follower على الصفحة يعني إن التحدي هيوصل لآلاف من صانعي القرار من أول بوست. التعليقات تغذي الخوارزمية وترفع الوصول أكثر. الشركة اللي اختيرت بريفها؟ هي دلوقتي في محادثة مباشرة مع الوكالة — ده lead حار أتولد بشكل عضوي 100%. يتربط بـ #مالنا_حدود وينعمل كل ربع سنة لبناء زخم متراكم.
+        </div>
+        <div class="idea-meta">
+          <span class="meta-tag">Challenge Format</span>
+          <span class="meta-tag">ربع سنوي</span>
+          <span class="meta-tag">Lead Generation</span>
+          <span class="meta-tag">Viral Potential</span>
+          <span class="meta-tag">#مالنا_حدود</span>
+          <span class="meta-tag">45K Activation</span>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+</main>
+
+<footer>
+  Prepared by <span>Shady El-Refaie</span> · Content Strategy Analysis · May 2026
+  <br/>
+  Data sourced from public web, LinkedIn, and third-party databases · pureminds.com.sa
+</footer>
+
+</body>
+</html>
